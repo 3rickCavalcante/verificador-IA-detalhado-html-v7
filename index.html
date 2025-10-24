@@ -8,7 +8,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     <style>
-        /* Mantenha todo o CSS anterior */
         * {
             margin: 0;
             padding: 0;
@@ -167,6 +166,8 @@
             margin: 10px 0;
             border-radius: 8px;
             border-left: 4px solid #667eea;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .highlight-human {
@@ -175,6 +176,8 @@
             padding: 10px;
             margin: 5px 0;
             border-radius: 4px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .highlight-ai {
@@ -183,6 +186,8 @@
             padding: 10px;
             margin: 5px 0;
             border-radius: 4px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .text-preview {
@@ -193,6 +198,8 @@
             border-radius: 8px;
             background: white;
             margin-top: 15px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .loading {
@@ -222,6 +229,8 @@
             border-radius: 8px;
             padding: 15px;
             margin-top: 20px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .suggestions h4 {
@@ -280,6 +289,8 @@
             border-radius: 6px;
             text-align: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .metric-value {
@@ -298,6 +309,58 @@
 
         .bad-metric {
             color: #e74c3c;
+        }
+
+        /* NOVOS ESTILOS PARA CORRIGIR O LAYOUT */
+        .results-section {
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .analysis-details-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 10px;
+            background: white;
+        }
+
+        .text-preview-container {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .text-preview-content {
+            padding: 15px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .compact-detail {
+            margin: 8px 0;
+            padding: 10px;
+            font-size: 0.9em;
+        }
+
+        .pattern-examples {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .scrollable-section {
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
         }
     </style>
 </head>
@@ -370,20 +433,23 @@
                     
                     <div class="analysis-details">
                         <h3>Detalhes da Análise</h3>
-                        <div id="analysisDetails">
+                        <div class="analysis-details-container" id="analysisDetails">
                             <!-- Os detalhes da análise serão inseridos aqui -->
                         </div>
                     </div>
                     
-                    <div class="text-preview" id="textPreview">
-                        <!-- O texto analisado será exibido aqui -->
+                    <div class="text-preview-container">
+                        <h4 style="margin: 15px 0 10px 0;">Texto Analisado</h4>
+                        <div class="text-preview-content" id="textPreview">
+                            <!-- O texto analisado será exibido aqui -->
+                        </div>
                     </div>
                     
                     <div class="suggestions" id="suggestions">
                         <!-- Sugestões serão inseridas aqui -->
                     </div>
                     
-                    <button class="btn" id="downloadPdfBtn" style="margin-top: 20px;">Baixar Relatório PDF Completo</button>
+                    <button class="btn" id="downloadPdfBtn" style="margin-top: 20px; width: 100%;">Baixar Relatório PDF Completo</button>
                 </div>
             </div>
         </div>
@@ -1047,23 +1113,23 @@
                 // Atualizar detalhes da análise
                 const analysisDetails = document.getElementById('analysisDetails');
                 analysisDetails.innerHTML = `
-                    <div class="detail-item">
+                    <div class="detail-item compact-detail">
                         <strong>Tipo de Conteúdo:</strong> ${document.querySelector(`#contentType option[value="${result.contentType}"]`).textContent}
                     </div>
-                    <div class="detail-item">
+                    <div class="detail-item compact-detail">
                         <strong>Estatísticas do Texto:</strong> ${result.wordCount} palavras, ${result.sentenceCount} sentenças, ${result.paragraphCount} parágrafos
                     </div>
-                    <div class="detail-item">
+                    <div class="detail-item compact-detail">
                         <strong>Marcadores Artificiais:</strong> ${result.advancedMetrics.markerCount} ocorrências de +1/+2
                     </div>
-                    <div class="detail-item">
+                    <div class="detail-item compact-detail">
                         <strong>Explicação Técnica:</strong> 
                         ${result.detailedExplanation.join('; ')}
                     </div>
-                    <div class="detail-item">
+                    <div class="detail-item compact-detail">
                         <strong>Padrões de IA Detectados:</strong> ${result.aiPatternAnalysis.patterns.length} padrões
                     </div>
-                    <div class="detail-item">
+                    <div class="detail-item compact-detail">
                         <strong>Padrões Humanos Detectados:</strong> ${result.humanPatternAnalysis.patterns.length} padrões
                     </div>
                 `;
@@ -1130,6 +1196,12 @@
             function displayTextWithHighlights(result) {
                 const textPreview = document.getElementById('textPreview');
                 let highlightedText = result.analyzedText;
+                
+                // Limitar o texto para evitar sobrecarga
+                const maxLength = 5000;
+                if (highlightedText.length > maxLength) {
+                    highlightedText = highlightedText.substring(0, maxLength) + '... [TEXTO TRUNCADO PARA VISUALIZAÇÃO]';
+                }
                 
                 // Ordenar destaques por posição (do final para o início para não afetar índices)
                 const allHighlights = [
